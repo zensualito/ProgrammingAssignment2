@@ -20,7 +20,25 @@
 #| that can cache its inverse.                     |
 #+-------------------------------------------------+
 makeCacheMatrix <- function(x = matrix()) {
-
+  inverse <- NULL
+  
+  set <- function(y) {
+    x <<- y
+    inverse <<- NULL
+  }
+  
+  get <- function() x
+  
+  set_inverse <- function(inversed) inverse <<- inversed
+  
+  get_inverse <- function() inverse
+  
+  list(
+    set =set,
+    get = get,
+    set_inverse = set_inverse,
+    get_inverse = get_inverse
+  )
 }
 
 #+-----------------------------------------------------+
@@ -30,9 +48,41 @@ makeCacheMatrix <- function(x = matrix()) {
 #| (and the matrix has not changed), then cacheSolve   |
 #| should retrieve the inverse from the cache.         |
 #+-----------------------------------------------------+
-
 cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
+  inverse <- x$get_inverse()
+  if(!is.null(inverse)) {
+    message("Getting ca$hed data")
+    return(inverse)
+  }
+  data <-x$get()
+  inverse <- solve(data)
+  x$set_inverse(inverse)
+  inverse
 }
 
-
+#+-----------------------------------+
+#| Example of usage:                 |
+#| =================                 |
+#| mdat <- matrix(c(1,3,3,           |
+#|                    1,4,3,         |
+#|                    1,3,4),        |
+#|                  nrow=3,ncol = 3, |
+#|                  byrow=TRUE)      |
+#| mdat                              |
+#|       [,1] [,2] [,3]              |
+#| [1,]    1    3    3               |
+#| [2,]    1    4    3               |
+#| [3,]    1    3    4               |
+#| matriz <- makeCacheMatrix(mdat)   |
+#| cacheSolve(matriz)                |
+#|       [,1] [,2] [,3]              |
+#| [1,]    7   -3   -3               |
+#| [2,]   -1    1    0               |
+#| [3,]   -1    0    1               |
+#| cacheSolve(matriz)                |
+#| Getting ca$hed data               |
+#|      [,1] [,2] [,3]               |
+#| [1,]    7   -3   -3               |
+#| [2,]   -1    1    0               |
+#| [3,]   -1    0    1               |
+#+-----------------------------------+
